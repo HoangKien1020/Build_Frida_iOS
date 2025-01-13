@@ -1,0 +1,106 @@
+name: "Build Frida for iOS"
+
+on:
+  workflow_dispatch:
+   inputs:
+    FRIDA_VERSION:
+      description: 'FRIDA_VERSION'
+      required: true
+
+permissions:
+  contents: write
+
+jobs:
+  iOS_build:
+    strategy:
+      matrix:
+        arch: [arm64, arm64e, x86_64-simulator, arm64-simulator]
+      fail-fast: false
+    runs-on: macos-latest
+    env:
+      XCODE11: /Applications/Xcode_11.7.app
+    steps:
+    - name: Check out repo
+      uses: actions/checkout@main
+      with:
+        fetch-depth: 0
+        submodules: recursive
+
+    - name: Create temp release
+      run: |
+        mkdir release-assets
+
+    - name: Clone frida repository
+      shell: bash
+      run: |
+        git clone --recurse-submodules https://github.com/frida/frida
+
+    - name: Configure
+      run: cd frida && >-
+          ./configure
+          "--prefix=$FRIDA_PREFIX"
+          --host=ios-${{ matrix.arch }}
+          --enable-portal
+          --
+          -Dfrida-gum:devkits=gum,gumjs
+          -Dfrida-gum:jailbreak=enabled
+          -Dfrida-gum:gumpp=disabled 
+          -Dfrida-gum:gumjs=enabled
+          -Dfrida-gum:v8=disabled
+          -Dfrida-gum:database=disabled
+          -Dfrida-gum:frida_objc_bridge=enabled
+          -Dfrida-gum:frida_swift_bridge=enabled
+          -Dfrida-gum:frida_java_bridge=disabled
+          -Dfrida-gum:tests=disabled
+          -Dfrida-core:assets=installed
+          -Dfrida-core:devkits=core
+          -Dfrida-core:connectivity=disabled
+          -Dfrida-core:tests=disabled
+          -Dfrida-core:mapper=enabled
+
+    - name: install cert env 
+      run: chmod +x gdb-cert.sh && ./gdb-cert.sh
+
+    - name: Compile frida
+      run: cd frida && make && make install
+
+    - name: tar core devkit
+      run: cd release-assets && tar -cJvf frida-core-devkit-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/core/ .
+
+    - name: tar gum devkit
+      run: cd release-assets && tar -cJvf frida-gum-devkit-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gum/ .
+
+    - name: tar gumjs devkit
+      run: cd release-assets && tar -cJvf frida-gumjs-devkit-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/ .
+
+    - name: tar frida-helper
+      if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
+      run: cd release-assets && tar -cJvf frida-helper-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/ frida-helper
+
+    - name: tar frida-inject
+      if: ${{ !endsWith(matrix.arch, '-simulator') }}
+      run: cd release-assets && tar -cJvf frida-inject-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-inject
+
+    - name: tar frida-portal
+      if: ${{ !endsWith(matrix.arch, '-simulator') }}
+      run: cd release-assets && tar -cJvf frida-portal-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-portal
+
+    - name: tar frida-server
+      if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
+      run: cd release-assets && tar -cJvf frida-server-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-server
+
+    - name: tar frida-agent
+      if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
+      run: cd release-assets && tar -cJvf frida-agent-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/ frida-agent.dylib
+
+    - name: tar frida-gadget
+      if: matrix.arch != 'arm64'
+      run: cd release-assets && tar -cJvf frida-gadget-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/ frida-gadget.dylib
+
+    - name: Create release frida ${{ matrix.arch }}
+      uses: ncipollo/release-action@main
+      with:
+        tag: ${{ github.event.inputs.FRIDA_VERSION }}
+        name: "Frida ${{ github.event.inputs.FRIDA_VERSION }}"
+        allowUpdates: true
+        artifacts: release-assets/*
