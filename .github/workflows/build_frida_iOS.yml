@@ -74,27 +74,27 @@ jobs:
       run: cd release-assets && tar -cJvf frida-gumjs-devkit-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/devkits/gumjs/ .
 
     - name: tar frida-helper
-      if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
+      #if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
       run: cd release-assets && tar -cJvf frida-helper-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/ frida-helper
 
     - name: tar frida-inject
-      if: ${{ !endsWith(matrix.arch, '-simulator') }}
+      #if: ${{ !endsWith(matrix.arch, '-simulator') }}
       run: cd release-assets && tar -cJvf frida-inject-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-inject
 
     - name: tar frida-portal
-      if: ${{ !endsWith(matrix.arch, '-simulator') }}
+      #if: ${{ !endsWith(matrix.arch, '-simulator') }}
       run: cd release-assets && tar -cJvf frida-portal-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-portal
 
     - name: tar frida-server
-      if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
+      #if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
       run: cd release-assets && tar -cJvf frida-server-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/bin/ frida-server
 
     - name: tar frida-agent
-      if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
+      #if: ${{ matrix.arch != 'arm64' && !endsWith(matrix.arch, '-simulator') }}
       run: cd release-assets && tar -cJvf frida-agent-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/ frida-agent.dylib
 
     - name: tar frida-gadget
-      if: matrix.arch != 'arm64'
+      #if: matrix.arch != 'arm64'
       run: cd release-assets && tar -cJvf frida-gadget-ios-${{ matrix.arch }}.tar.xz -C ../frida${{ env.FRIDA_PREFIX }}/lib/frida/ frida-gadget.dylib
 
     - name: Create release frida ${{ matrix.arch }}
