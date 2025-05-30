@@ -2,10 +2,6 @@ name: "Build Frida for iOS"
 
 on:
   workflow_dispatch:
-   inputs:
-    FRIDA_VERSION:
-      description: 'FRIDA_VERSION'
-      required: true
 
 permissions:
   contents: write
