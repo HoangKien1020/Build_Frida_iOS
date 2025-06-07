@@ -10,7 +10,7 @@ jobs:
   iOS_build:
     strategy:
       matrix:
-        arch: [arm64, arm64e, x86_64-simulator, arm64-simulator]
+        arch: [arm64, arm64e]
       fail-fast: false
     runs-on: macos-latest
     env:
