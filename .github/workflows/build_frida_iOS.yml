@@ -25,11 +25,12 @@ jobs:
     - name: Create temp release
       run: |
         mkdir release-assets
+        sudo apt-get install jq -y
 
     - name: Get latest FRIDA_VERSION from Release
       id: get_frida_version
       run: |
-         echo "FRIDA_VERSION=$(curl -s https://api.github.com/repos/frida/frida/releases/latest | jq -r .tag_name)" >> "$GITHUB_OUTPUT"
+        echo "FRIDA_VERSION=$(curl -s https://api.github.com/repos/frida/frida/releases/latest | jq -r .tag_name)" >> "$GITHUB_OUTPUT"
 
     - name: Clone frida repository
       shell: bash
@@ -98,7 +99,7 @@ jobs:
     - name: Create release frida ${{ matrix.arch }}
       uses: ncipollo/release-action@main
       with:
-        tag: ${{ steps.get_frida_version.outputs.FRIDA_VERSION }}
+        tag: "${{ steps.get_frida_version.outputs.FRIDA_VERSION }}"
         name: "Frida ${{ steps.get_frida_version.outputs.FRIDA_VERSION }}"
         allowUpdates: true
         artifacts: release-assets/*
