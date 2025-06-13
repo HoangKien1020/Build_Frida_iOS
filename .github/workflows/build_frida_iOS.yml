@@ -25,7 +25,6 @@ jobs:
     - name: Create temp release
       run: |
         mkdir release-assets
-        brew install jq
 
     - name: Get latest FRIDA_VERSION from Release
       id: get_frida_version
@@ -35,6 +34,7 @@ jobs:
     - name: Clone frida repository
       shell: bash
       run: |
+        echo "${{ steps.get_frida_version.outputs.FRIDA_VERSION }}"
         git clone --recurse-submodules https://github.com/frida/frida
 
     - name: Configure
