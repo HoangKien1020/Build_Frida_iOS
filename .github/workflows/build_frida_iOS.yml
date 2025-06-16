@@ -29,7 +29,8 @@ jobs:
     - name: Get latest FRIDA_VERSION from Release
       id: get_frida_version
       run: |
-        echo "FRIDA_VERSION=$(curl --silent "https://api.github.com/repos/frida/frida/releases/latest" | grep '"tag_name":' | sed -E 's/.*"([^"]+)".*/\1/')" >> "$GITHUB_OUTPUT"
+        FRIDA_VERSION=$(curl --silent "https://api.github.com/repos/frida/frida/releases/latest" | jq -r '.tag_name')
+        echo "FRIDA_VERSION=$FRIDA_VERSION" >> "$GITHUB_OUTPUT"
 
     - name: Clone frida repository
       shell: bash
