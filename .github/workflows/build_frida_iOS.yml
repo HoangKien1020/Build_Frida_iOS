@@ -2,6 +2,10 @@ name: "Build Frida for iOS"
 
 on:
   workflow_dispatch:
+   inputs:
+    FRIDA_VERSION:
+      description: 'FRIDA_VERSION'
+      required: true
 
 permissions:
   contents: write
@@ -100,7 +104,7 @@ jobs:
     - name: Create release frida ${{ matrix.arch }}
       uses: ncipollo/release-action@main
       with:
-        tag: "${{ steps.get_frida_version.outputs.FRIDA_VERSION }}"
-        name: "Frida ${{ steps.get_frida_version.outputs.FRIDA_VERSION }}"
+        tag: ${{ github.event.inputs.FRIDA_VERSION }}
+        name: "Frida ${{ github.event.inputs.FRIDA_VERSION }}"
         allowUpdates: true
         artifacts: release-assets/*
